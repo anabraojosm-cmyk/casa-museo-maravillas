@@ -7,7 +7,7 @@ function App() {
 
   return (
     <div className="app-contenedor">
-      
+
       {/* BLOQUE 1 - HEADER */}
       <header className="header">
         <h1 className="titulo">Casa Museo Maravillas</h1>
@@ -39,7 +39,7 @@ function App() {
           <div className="hud-sensores">
             <p>🌡️ Temp: 21°C</p>
             <p>💧 Hum: 55%</p>
-            <p>💡 Lux: 320</p>
+            <p>💡 Lux: 60</p>
           </div>
           <div className="controles-visor">
             <button>🔍+</button>
@@ -51,15 +51,15 @@ function App() {
       </main>
 
       {/* BLOQUE 3 - BUSCADOR */}
-      <footer className="buscador-contenedor">
-        
+      <div className="buscador-contenedor">
+
         {/* Izquierda - búsqueda y botones */}
         <div className="buscador-izquierda">
           <input className="buscador-input" type="text" placeholder="Introduce el código de la pieza..." />
           <div className="buscador-botones">
-            <button>🔄 Rotar</button>
-            <button>🔁 Sustituir</button>
-            <button>⬜ Dejar vacío</button>
+            <button className="boton-rotar">🔄 Rotar</button>
+            <button className="boton-sustituir">🔁 Sustituir</button>
+            <button className="boton-vacio">⬜ Dejar vacío</button>
           </div>
         </div>
 
@@ -79,7 +79,7 @@ function App() {
           <button className="boton-exportar">📄 Exportar</button>
         </div>
 
-      </footer>
+      </div>
 
     </div>
   )
