@@ -16,17 +16,20 @@ function App() {
         </button>
         {menuAbierto && (
           <div className="menu-desplegable">
+            <button onClick={() => { setVistaActiva('restablecido'); setMenuAbierto(false) }}>
+              Restablecer mapa 3D
+            </button>
             <button onClick={() => { setVistaActiva('calor-temperatura'); setMenuAbierto(false) }}>
-              🌡️ Mapa de calor de temperatura
+              Mapa de calor de temperatura
             </button>
             <button onClick={() => { setVistaActiva('calor-humedad'); setMenuAbierto(false) }}>
-              💧 Mapa de calor de humedad
+              Mapa de calor de humedad
             </button>
             <button onClick={() => { setVistaActiva('graficas'); setMenuAbierto(false) }}>
-              📊 Gráficas
+              Gráficas
             </button>
             <button onClick={() => { setVistaActiva('piezas-riesgo'); setMenuAbierto(false) }}>
-              ⚠️ Mapa de piezas en riesgo
+              Mapa de piezas en riesgo
             </button>
           </div>
         )}
