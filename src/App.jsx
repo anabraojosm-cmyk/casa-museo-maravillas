@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import Visor3D from './components/visor3D/Visor3D'
 
 function App() {
   const [menuAbierto, setMenuAbierto] = useState(false)
@@ -38,7 +39,7 @@ function App() {
       {/* BLOQUE 2 - VISOR 3D */}
       <main className="visor-contenedor">
         <div className="visor-3d">
-          <p className="visor-placeholder">[ Visor 3D de la sala — aquí irá el modelo ]</p>
+          <Visor3D />
           <div className="hud-sensores">
             <p>🌡️ Temp: 21°C</p>
             <p>💧 Hum: 55%</p>
