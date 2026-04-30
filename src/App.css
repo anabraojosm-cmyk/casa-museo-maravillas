@@ -101,7 +101,7 @@ body {
 .visor-contenedor {
   flex: 1;
   position: relative;
-  background-color: #e8e8e5;
+  background-color: #c7c7c6;
   overflow: hidden;
   border-bottom: 3px solid #051d39;
 }
@@ -116,7 +116,7 @@ body {
 }
 
 .visor-placeholder {
-  color: #999994;
+  color: #83837f;
   font-size: 1rem;
   font-family: 'Inter', sans-serif;
   font-weight: 300;
@@ -183,7 +183,8 @@ body {
 .buscador-contenedor {
   display: flex;
   background-color: #ffffff;
-  height: 200px;
+  border-top: 1px solid #d0d0cc;
+  height: 220px;
   padding: 16px 24px;
   gap: 16px;
 }
@@ -340,4 +341,31 @@ body {
 
 .boton-exportar:hover {
   background-color: #0a3260;
+}/* BOTÓN BUSCAR */
+.boton-buscar {
+  background-color: #051d39;
+  border: none;
+  color: #ffffff;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.boton-buscar:hover {
+  background-color: #0a3260;
+}
+
+/* NOMBRE PIEZA EN CENTRO */
+.nombre-pieza-centro {
+  color: #051d39;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 16px;
 }

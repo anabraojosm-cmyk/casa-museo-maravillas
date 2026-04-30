@@ -1,1 +1,145 @@
-[] 
+ [
+  {
+    "codigo": "armario_01",
+    "nombre": "Libreo",
+    "autor": "Desconocido",
+    "datacion": "S. XVIII",
+    "tipologia": "Mobiliario",
+    "materiales": "Madera de nogal tallada",
+    "dimensiones": "210 x 120 x 55 cm",
+    "imagen": "",
+    "enRiesgo": false
+  },
+  {
+    "codigo": "armario_02",
+    "nombre": "Librero",
+    "autor": "Desconocido",
+    "datacion": "S. XVII",
+    "tipologia": "Mobiliario",
+    "materiales": "Madera de castaño con herrajes de hierro forjado",
+    "dimensiones": "195 x 110 x 50 cm",
+    "imagen": "",
+    "enRiesgo": false
+  },
+  {
+    "codigo": "cuadro_01",
+    "nombre": "Retrato de dama con abanico",
+    "autor": "Atribuido a José Ribera",
+    "datacion": "ca. 1650",
+    "tipologia": "Pintura",
+    "materiales": "Óleo sobre lienzo",
+    "dimensiones": "85 x 65 cm",
+    "imagen": "",
+    "enRiesgo": true
+  },
+  {
+    "codigo": "cuadro_02",
+    "nombre": "Paisaje con ruinas romanas",
+    "autor": "Escuela flamenca",
+    "datacion": "S. XVII",
+    "tipologia": "Pintura",
+    "materiales": "Óleo sobre tabla",
+    "dimensiones": "72 x 90 cm",
+    "imagen": "",
+    "enRiesgo": false
+  },
+  {
+    "codigo": "cuadro_03",
+    "nombre": "Bodegón con caza y frutas",
+    "autor": "Desconocido",
+    "datacion": "S. XVIII",
+    "tipologia": "Pintura",
+    "materiales": "Óleo sobre lienzo",
+    "dimensiones": "60 x 80 cm",
+    "imagen": "",
+    "enRiesgo": false
+  },
+  {
+    "codigo": "cuadro_04",
+    "nombre": "Virgen con el Niño",
+    "autor": "Escuela sevillana",
+    "datacion": "ca. 1700",
+    "tipologia": "Pintura",
+    "materiales": "Óleo sobre lienzo",
+    "dimensiones": "95 x 70 cm",
+    "imagen": "",
+    "enRiesgo": true
+  },
+  {
+    "codigo": "alfombra",
+    "nombre": "Alfombra de nudo español",
+    "autor": "Real Fábrica de Tapices",
+    "datacion": "S. XIX",
+    "tipologia": "Textil",
+    "materiales": "Lana y seda sobre urdimbre de algodón",
+    "dimensiones": "320 x 240 cm",
+    "imagen": "",
+    "enRiesgo": false
+  },
+  {
+    "codigo": "sofa_01",
+    "nombre": "Sofá fernandino con cojines",
+    "autor": "Desconocido",
+    "datacion": "ca. 1820-1833",
+    "tipologia": "Mobiliario",
+    "materiales": "Madera de caoba dorada, tapizado en seda adamascada y cojines bordados con hilo de oro",
+    "dimensiones": "Sofá: 180 x 75 x 95 cm — Cojines: 45 x 45 cm",
+    "imagen": "",
+    "enRiesgo": false
+  },
+  {
+    "codigo": "tapiz_01",
+    "nombre": "Tapiz de caza real",
+    "autor": "Manufactura de Bruselas",
+    "datacion": "ca. 1720",
+    "tipologia": "Textil",
+    "materiales": "Lana y seda",
+    "dimensiones": "280 x 350 cm",
+    "imagen": "",
+    "enRiesgo": true
+  },
+  {
+    "codigo": "puerta",
+    "nombre": "Puerta de entrada con molduras",
+    "autor": "Desconocido",
+    "datacion": "S. XVIII",
+    "tipologia": "Elementos arquitectónicos",
+    "materiales": "Madera de pino tallada y dorada",
+    "dimensiones": "220 x 100 cm",
+    "imagen": "",
+    "enRiesgo": false
+  },
+  {
+    "codigo": "silla_01",
+    "nombre": "Silla fernandina de brazos",
+    "autor": "Desconocido",
+    "datacion": "ca. 1820-1833",
+    "tipologia": "Mobiliario",
+    "materiales": "Madera de caoba dorada con tapizado en seda adamascada",
+    "dimensiones": "95 x 55 x 50 cm",
+    "imagen": "",
+    "enRiesgo": false
+  },
+  {
+    "codigo": "silla_02",
+    "nombre": "Silla fernandina sin brazos",
+    "autor": "Desconocido",
+    "datacion": "ca. 1820-1833",
+    "tipologia": "Mobiliario",
+    "materiales": "Madera de caoba dorada con tapizado en seda adamascada",
+    "dimensiones": "90 x 45 x 45 cm",
+    "imagen": "",
+    "enRiesgo": false
+  },
+  {
+    "codigo": "mesa_01",
+    "nombre": "Mesa de centro con tablero de mármol",
+    "autor": "Desconocido",
+    "datacion": "ca. 1880",
+    "tipologia": "Mobiliario",
+    "materiales": "Madera de nogal y mármol de Carrara",
+    "dimensiones": "75 x 120 x 60 cm",
+    "imagen": "",
+    "enRiesgo": false
+  }
+]
