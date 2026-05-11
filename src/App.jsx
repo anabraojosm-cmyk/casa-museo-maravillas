@@ -7,6 +7,7 @@ function App() {
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [vistaActiva, setVistaActiva] = useState('normal')
   const [codigoSeleccionado, setCodigoSeleccionado] = useState(null)
+const [sustitucion, setSustitucion] = useState(null)
 
   return (
     <div className="app-contenedor">
@@ -43,11 +44,16 @@ function App() {
 
         {/* VISOR 3D */}
         <main className="visor-contenedor">
-  <Visor3D codigoSeleccionado={codigoSeleccionado} vistaActiva={vistaActiva} />
+  <Visor3D codigoSeleccionado={codigoSeleccionado} vistaActiva={vistaActiva} sustitucion={sustitucion} />
   <div className="hud-sensores">
     <p>🌡️ Temp: 21°C</p>
     <p>💧 Hum: 55%</p>
     <p>💡 Lux: 60</p>
+  </div>
+  <div className="controles-visor">
+    <button onClick={() => document.dispatchEvent(new CustomEvent('zoom-in'))}>+</button>
+    <button onClick={() => document.dispatchEvent(new CustomEvent('zoom-out'))}>−</button>
+    <button onClick={() => document.dispatchEvent(new CustomEvent('reset-camera'))}>↺</button>
   </div>
 </main>
 
@@ -55,7 +61,7 @@ function App() {
 
       {/* COLUMNA DERECHA */}
       <div className="columna-derecha">
-        <PanelBuscador onPiezaSeleccionada={setCodigoSeleccionado} />
+        <PanelBuscador onPiezaSeleccionada={setCodigoSeleccionado} onSustitucion={setSustitucion} />
       </div>
 
     </div>

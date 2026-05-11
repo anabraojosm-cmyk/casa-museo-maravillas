@@ -498,3 +498,131 @@ body {
 .boton-exportar:hover {
   background-color: #0a3260;
 }
+.controles-visor {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+}
+
+.controles-visor button {
+  background-color: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(5, 29, 57, 0.15);
+  color: #051d39;
+  font-size: 1.1rem;
+  font-weight: 500;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.controles-visor button:hover {
+  background-color: #051d39;
+  color: #ffffff;
+}
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-contenido {
+  background-color: #ffffff;
+  border-top: 3px solid #051d39;
+  border-radius: 4px;
+  padding: 24px;
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+
+.modal-titulo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: #051d39;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.modal-subtitulo {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: #444444;
+}
+
+.modal-resultado {
+  background-color: #f5f5f3;
+  border: 1px solid #d0d0cc;
+  border-left: 3px solid #051d39;
+  border-radius: 3px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: #444444;
+}
+
+.boton-sustituir-confirmar {
+  margin-top: 8px;
+  background-color: #3a5c3e;
+  border: none;
+  color: #ffffff;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.boton-sustituir-confirmar:hover {
+  background-color: #2a4a2e;
+}
+
+.modal-cerrar {
+  background: none;
+  border: 1px solid #d0d0cc;
+  color: #888888;
+  padding: 7px 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  transition: all 0.15s ease;
+}
+
+.modal-cerrar:hover {
+  border-color: #cc2222;
+  color: #cc2222;
+}
+
+/* BOTONES CENTRADOS */
+.boton-rotar, .boton-sustituir, .boton-vacio {
+  text-align: center;
+  justify-content: center;
+}

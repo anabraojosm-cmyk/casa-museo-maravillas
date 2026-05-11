@@ -73,7 +73,7 @@ function ParpadeoRiesgo({ materialesRiesgo }) {
   return null
 }
 
-function Sala({ codigoSeleccionado, vistaActiva, materialesRiesgo }) {
+function Sala({ codigoSeleccionado, vistaActiva, materialesRiesgo, sustitucion }) {
   const { scene } = useGLTF('/casa-museo-maravillas/models/sala.glb')
   const materialesOriginales = useRef({})
   const mostrarMapa = vistaActiva === 'calor-temperatura' || vistaActiva === 'calor-humedad'
@@ -82,7 +82,10 @@ function Sala({ codigoSeleccionado, vistaActiva, materialesRiesgo }) {
   useEffect(() => {
     scene.traverse((objeto) => {
       if (objeto.name === 'techo') objeto.visible = false
-
+      if (sustitucion && objeto.name === sustitucion.original) {
+       objeto.visible = false
+        return
+        }
       if (objeto.isMesh) {
         if (!materialesOriginales.current[objeto.name]) {
           materialesOriginales.current[objeto.name] = objeto.material.clone()
@@ -122,9 +125,40 @@ function Sala({ codigoSeleccionado, vistaActiva, materialesRiesgo }) {
     })
   }, [scene, codigoSeleccionado, vistaActiva, mostrarMapa, mostrarRiesgo])
 
-  return <primitive object={scene} />
-}
+  useEffect(() => {
+  scene.traverse((objeto) => {
+    if (objeto.isMesh) {
+      objeto.castShadow = true
+      objeto.receiveShadow = true
+    }
+  })
+}, [scene])
 
+return <primitive object={scene} />
+}
+function SalaConSustituta({ sustitucion }) {
+  if (!sustitucion) return null
+
+  const { scene: sceneSustituta } = useGLTF(
+    `/casa-museo-maravillas/models/piezas/${sustitucion.sustituta}.glb`
+  )
+  const { scene: sceneOriginal } = useGLTF('/casa-museo-maravillas/models/sala.glb')
+
+  const posicion = useRef(new THREE.Vector3())
+
+  useEffect(() => {
+    sceneOriginal.traverse((objeto) => {
+      if (objeto.name === sustitucion.original) {
+        objeto.getWorldPosition(posicion.current)
+      }
+    })
+    const box = new THREE.Box3().setFromObject(sceneSustituta)
+    const center = box.getCenter(new THREE.Vector3())
+    sceneSustituta.position.copy(posicion.current).sub(center)
+  }, [sustitucion, sceneSustituta, sceneOriginal])
+
+  return <primitive object={sceneSustituta} />
+}
 function Visor3D({ codigoSeleccionado, vistaActiva }) {
   const [mensajeCerrado, setMensajeCerrado] = useState(false)
   const materialesRiesgo = useRef({})
@@ -142,25 +176,77 @@ function Visor3D({ codigoSeleccionado, vistaActiva }) {
   const labelsHumedad = ['70%+', '60%', '50%', '40%', '-40%']
   const escalaGradiente = vistaActiva === 'calor-temperatura' ? escalaTemperatura : escalaHumedad
   const escalaLabels = vistaActiva === 'calor-temperatura' ? labelsTemperatura : labelsHumedad
+const cameraRef = useRef()
+const controlsRef = useRef()
 
+useEffect(() => {
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      controlsRef.current.dollyIn(1.2)
+      controlsRef.current.update()
+    }
+  }
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      controlsRef.current.dollyOut(1.2)
+      controlsRef.current.update()
+    }
+  }
+  const handleReset = () => {
+    if (controlsRef.current) {
+      controlsRef.current.reset()
+    }
+  }
+
+  document.addEventListener('zoom-in', handleZoomIn)
+  document.addEventListener('zoom-out', handleZoomOut)
+  document.addEventListener('reset-camera', handleReset)
+
+  return () => {
+    document.removeEventListener('zoom-in', handleZoomIn)
+    document.removeEventListener('zoom-out', handleZoomOut)
+    document.removeEventListener('reset-camera', handleReset)
+  }
+}, [])
   return (
     <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
       <Canvas
+  shadows
   camera={{ position: [0, 5, 10], fov: 60 }}
   style={{ width: '100%', height: '100%', display: 'block' }}
 >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} />
+        <ambientLight intensity={0.3} />
+<directionalLight 
+  position={[10, 10, 5]} 
+  intensity={2} 
+  castShadow
+  shadow-mapSize-width={2048}
+  shadow-mapSize-height={2048}
+  shadow-camera-far={50}
+  shadow-camera-left={-20}
+  shadow-camera-right={20}
+  shadow-camera-top={20}
+  shadow-camera-bottom={-20}
+/>
+<directionalLight position={[-5, 8, -5]} intensity={0.5} />
         <Suspense fallback={null}>
           <Sala
             codigoSeleccionado={codigoSeleccionado}
             vistaActiva={vistaActiva}
             materialesRiesgo={materialesRiesgo}
+            sustitucion={sustitucion}
           />
+<SalaConSustituta sustitucion={sustitucion} />
+
           {mostrarRiesgo && <ParpadeoRiesgo materialesRiesgo={materialesRiesgo} />}
           <Environment preset="apartment" />
         </Suspense>
-        <OrbitControls enableZoom={true} enableRotate={true} enablePan={true} />
+        <OrbitControls 
+  ref={controlsRef}
+  enableZoom={true} 
+  enableRotate={true} 
+  enablePan={true} 
+/>
       </Canvas>
 
       {/* Escala mapa de calor */}
