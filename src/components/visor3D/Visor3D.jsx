@@ -144,11 +144,11 @@ function Visor3D({ codigoSeleccionado, vistaActiva }) {
   const escalaLabels = vistaActiva === 'calor-temperatura' ? labelsTemperatura : labelsHumedad
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
       <Canvas
-        camera={{ position: [0, 5, 10], fov: 60 }}
-        style={{ width: '100%', height: '100%' }}
-      >
+  camera={{ position: [0, 5, 10], fov: 60 }}
+  style={{ width: '100%', height: '100%', display: 'block' }}
+>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <Suspense fallback={null}>

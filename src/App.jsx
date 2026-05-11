@@ -43,15 +43,13 @@ function App() {
 
         {/* VISOR 3D */}
         <main className="visor-contenedor">
-          <div className="visor-3d">
-            <Visor3D codigoSeleccionado={codigoSeleccionado} vistaActiva={vistaActiva} />
-            <div className="hud-sensores">
-              <p>🌡️ Temp: 21°C</p>
-              <p>💧 Hum: 55%</p>
-              <p>💡 Lux: 60</p>
-            </div>
-          </div>
-        </main>
+  <Visor3D codigoSeleccionado={codigoSeleccionado} vistaActiva={vistaActiva} />
+  <div className="hud-sensores">
+    <p>🌡️ Temp: 21°C</p>
+    <p>💧 Hum: 55%</p>
+    <p>💡 Lux: 60</p>
+  </div>
+</main>
 
       </div>
 
