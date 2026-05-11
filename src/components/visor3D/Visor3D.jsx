@@ -1,23 +1,115 @@
-import { Suspense, useEffect, useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Environment } from '@react-three/drei'
 import * as THREE from 'three'
-import MapaCenital from './MapaCenital'
 
-function Sala({ codigoSeleccionado }) {
+const PIEZAS_RIESGO = ['silla_02', 'cojin_sofa_02']
+
+const FUENTES_TEMPERATURA = [
+  { x: -4.52, z: 6.85, tipo: 'frio', intensidad: 1.5 },
+  { x: 3.38,  z: 6.85, tipo: 'frio', intensidad: 1.5 },
+  { x: -9.88, z: 0,    tipo: 'frio', intensidad: 0.7 },
+  { x: 9.64,  z: 0,    tipo: 'calor', intensidad: 1.0 },
+  { x: 0,     z: -6.98, tipo: 'calor', intensidad: 1.8 },
+  { x: 0,     z: -0.06, tipo: 'calor', intensidad: 0.8 },
+  { x: 0,     z: -0.06, tipo: 'frio', intensidad: 0.6 },
+]
+
+const FUENTES_HUMEDAD = [
+  { x: -4.52, z: 6.85, tipo: 'humedo', intensidad: 1.0 },
+  { x: 3.38,  z: 6.85, tipo: 'humedo', intensidad: 1.0 },
+  { x: 0,     z: -6.98, tipo: 'seco', intensidad: 0.8 },
+  { x: 9.64,  z: 0,    tipo: 'seco', intensidad: 0.6 },
+]
+
+function calcularColorTemperatura(x, z) {
+  let pesoFrio = 0
+  let pesoCalor = 0
+  FUENTES_TEMPERATURA.forEach(f => {
+    const dist = Math.sqrt((x - f.x) ** 2 + (z - f.z) ** 2)
+    const influencia = f.intensidad / (1 + dist * 0.15)
+    if (f.tipo === 'frio') pesoFrio += influencia
+    else pesoCalor += influencia
+  })
+  const total = pesoFrio + pesoCalor
+  const t = pesoCalor / total
+  const color = new THREE.Color()
+  if (t < 0.25) color.lerpColors(new THREE.Color('#2255ff'), new THREE.Color('#44aaff'), t / 0.25)
+  else if (t < 0.5) color.lerpColors(new THREE.Color('#44aaff'), new THREE.Color('#44cc44'), (t - 0.25) / 0.25)
+  else if (t < 0.75) color.lerpColors(new THREE.Color('#44cc44'), new THREE.Color('#ffaa00'), (t - 0.5) / 0.25)
+  else color.lerpColors(new THREE.Color('#ffaa00'), new THREE.Color('#ff2200'), (t - 0.75) / 0.25)
+  return color
+}
+
+function calcularColorHumedad(x, z) {
+  let pesoHumedo = 0
+  let pesoSeco = 0
+  FUENTES_HUMEDAD.forEach(f => {
+    const dist = Math.sqrt((x - f.x) ** 2 + (z - f.z) ** 2)
+    const influencia = f.intensidad / (1 + dist * 0.15)
+    if (f.tipo === 'humedo') pesoHumedo += influencia
+    else pesoSeco += influencia
+  })
+  const total = pesoHumedo + pesoSeco
+  const t = pesoHumedo / total
+  const color = new THREE.Color()
+  if (t < 0.25) color.lerpColors(new THREE.Color('#ffaa00'), new THREE.Color('#88cc44'), t / 0.25)
+  else if (t < 0.5) color.lerpColors(new THREE.Color('#88cc44'), new THREE.Color('#00aaff'), (t - 0.25) / 0.25)
+  else if (t < 0.75) color.lerpColors(new THREE.Color('#00aaff'), new THREE.Color('#0088ff'), (t - 0.5) / 0.25)
+  else color.lerpColors(new THREE.Color('#0088ff'), new THREE.Color('#0022ff'), (t - 0.75) / 0.25)
+  return color
+}
+
+// Componente que parpadea — tiene que estar DENTRO del Canvas
+function ParpadeoRiesgo({ materialesRiesgo }) {
+  useFrame(({ clock }) => {
+    const t = (Math.sin(clock.getElapsedTime() * 3) + 1) / 2
+    PIEZAS_RIESGO.forEach(nombre => {
+      if (materialesRiesgo.current[nombre]) {
+        materialesRiesgo.current[nombre].emissiveIntensity = 0.2 + t * 1.0
+      }
+    })
+  })
+  return null
+}
+
+function Sala({ codigoSeleccionado, vistaActiva, materialesRiesgo }) {
   const { scene } = useGLTF('/casa-museo-maravillas/models/sala.glb')
   const materialesOriginales = useRef({})
+  const mostrarMapa = vistaActiva === 'calor-temperatura' || vistaActiva === 'calor-humedad'
+  const mostrarRiesgo = vistaActiva === 'piezas-riesgo'
 
   useEffect(() => {
     scene.traverse((objeto) => {
-      if (objeto.name === 'techo') {
-        objeto.visible = false
-      }
+      if (objeto.name === 'techo') objeto.visible = false
+
       if (objeto.isMesh) {
         if (!materialesOriginales.current[objeto.name]) {
           materialesOriginales.current[objeto.name] = objeto.material.clone()
         }
-        if (objeto.name === codigoSeleccionado) {
+
+        if (mostrarMapa) {
+          const posicion = new THREE.Vector3()
+          objeto.getWorldPosition(posicion)
+          const color = vistaActiva === 'calor-temperatura'
+            ? calcularColorTemperatura(posicion.x, posicion.z)
+            : calcularColorHumedad(posicion.x, posicion.z)
+          objeto.material = new THREE.MeshStandardMaterial({
+            color: color,
+            emissive: color,
+            emissiveIntensity: 0.2,
+            transparent: true,
+            opacity: 0.85,
+          })
+        } else if (mostrarRiesgo && PIEZAS_RIESGO.includes(objeto.name)) {
+          const mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color('#ff0000'),
+            emissive: new THREE.Color('#ff0000'),
+            emissiveIntensity: 0.6,
+          })
+          materialesRiesgo.current[objeto.name] = mat
+          objeto.material = mat
+        } else if (objeto.name === codigoSeleccionado) {
           objeto.material = new THREE.MeshStandardMaterial({
             color: new THREE.Color('#ee912e'),
             emissive: new THREE.Color('#ee912e'),
@@ -28,86 +120,83 @@ function Sala({ codigoSeleccionado }) {
         }
       }
     })
-  }, [scene, codigoSeleccionado])
+  }, [scene, codigoSeleccionado, vistaActiva, mostrarMapa, mostrarRiesgo])
 
   return <primitive object={scene} />
 }
-const bx = (x) => ((x + 10) / 20) * 100
-const by = (y) => ((7 - y) / 14) * 100
 
 function Visor3D({ codigoSeleccionado, vistaActiva }) {
+  const [mensajeCerrado, setMensajeCerrado] = useState(false)
+  const materialesRiesgo = useRef({})
   const mostrarMapa = vistaActiva === 'calor-temperatura' || vistaActiva === 'calor-humedad'
+  const mostrarRiesgo = vistaActiva === 'piezas-riesgo'
 
-  const puntosTemperatura = [
-    { x: bx(-4.75), y: by(6.98), color: 'rgba(255,0,0,0.7)', r: 120 },
-    { x: bx(2.48), y: by(6.77), color: 'rgba(255,50,0,0.6)', r: 100 },
-    { x: bx(9.64), y: by(0.11), color: 'rgba(255,30,0,0.65)', r: 130 },
-    { x: bx(-4.52), y: by(-6.85), color: 'rgba(0,68,255,0.7)', r: 110 },
-    { x: bx(3.38), y: by(-6.85), color: 'rgba(0,68,255,0.7)', r: 110 },
-    { x: bx(-9.88), y: by(0.11), color: 'rgba(0,80,255,0.65)', r: 120 },
-    { x: bx(0), y: by(0), color: 'rgba(68,200,68,0.5)', r: 100 },
-  ]
+  useEffect(() => {
+    setMensajeCerrado(false)
+    materialesRiesgo.current = {}
+  }, [vistaActiva])
 
-  const puntosHumedad = [
-    { x: bx(-4.52), y: by(-6.85), color: 'rgba(0,34,255,0.75)', r: 130 },
-    { x: bx(3.38), y: by(-6.85), color: 'rgba(0,34,255,0.75)', r: 130 },
-    { x: bx(0), y: by(-5), color: 'rgba(0,68,255,0.5)', r: 100 },
-    { x: bx(-4.75), y: by(6.98), color: 'rgba(255,170,0,0.65)', r: 110 },
-    { x: bx(0), y: by(0), color: 'rgba(0,170,255,0.4)', r: 90 },
-  ]
-
-  const puntos = vistaActiva === 'calor-temperatura' ? puntosTemperatura : puntosHumedad
+  const escalaTemperatura = 'linear-gradient(to bottom, #ff2200, #ffaa00, #44cc44, #44aaff, #2255ff)'
+  const escalaHumedad = 'linear-gradient(to bottom, #0022ff, #0088ff, #00aaff, #88cc44, #ffaa00)'
+  const labelsTemperatura = ['25°C+', '22°C', '20°C', '18°C', '16°C']
+  const labelsHumedad = ['70%+', '60%', '50%', '40%', '-40%']
+  const escalaGradiente = vistaActiva === 'calor-temperatura' ? escalaTemperatura : escalaHumedad
+  const escalaLabels = vistaActiva === 'calor-temperatura' ? labelsTemperatura : labelsHumedad
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <Canvas
-        camera={mostrarMapa
-          ? { position: [0, 20, 0], fov: 60, up: [0, 0, -1] }
-          : { position: [0, 5, 10], fov: 60 }
-        }
+        camera={{ position: [0, 5, 10], fov: 60 }}
         style={{ width: '100%', height: '100%' }}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <Suspense fallback={null}>
-          <Sala codigoSeleccionado={codigoSeleccionado} />
+          <Sala
+            codigoSeleccionado={codigoSeleccionado}
+            vistaActiva={vistaActiva}
+            materialesRiesgo={materialesRiesgo}
+          />
+          {mostrarRiesgo && <ParpadeoRiesgo materialesRiesgo={materialesRiesgo} />}
           <Environment preset="apartment" />
         </Suspense>
-        <OrbitControls
-          enableZoom={!mostrarMapa}
-          enableRotate={!mostrarMapa}
-          enablePan={!mostrarMapa}
-        />
+        <OrbitControls enableZoom={true} enableRotate={true} enablePan={true} />
       </Canvas>
 
-      {/* Mapa de calor SVG encima del canvas */}
+      {/* Escala mapa de calor */}
       {mostrarMapa && (
-        <svg style={{
-          position: 'absolute',
-          top: 0, left: 0,
-          width: '100%', height: '100%',
-          pointerEvents: 'none',
-          zIndex: 10,
-        }}>
-          <defs>
-            {puntos.map((p, i) => (
-              <radialGradient key={i} id={`heatgrad${i}`} cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor={p.color} />
-                <stop offset="100%" stopColor="transparent" />
-              </radialGradient>
+        <div className="escala-calor">
+          <div className="escala-calor-barra" style={{ background: escalaGradiente }} />
+          <div className="escala-calor-labels">
+            {escalaLabels.map((label, i) => (
+              <span key={i} className="escala-calor-label">{label}</span>
             ))}
-          </defs>
-          {puntos.map((p, i) => (
-            <ellipse
-              key={i}
-              cx={`${p.x}%`}
-              cy={`${p.y}%`}
-              rx={p.r}
-              ry={p.r}
-              fill={`url(#heatgrad${i})`}
-            />
-          ))}
-        </svg>
+          </div>
+        </div>
+      )}
+
+      {/* Mensaje piezas en riesgo */}
+      {mostrarRiesgo && !mensajeCerrado && (
+        <div className="mensaje-riesgo">
+          <div className="mensaje-riesgo-contenido">
+            <span className="mensaje-riesgo-icono">⚠️</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+  <p className="mensaje-riesgo-titulo">Piezas en riesgo</p>
+  <p className="mensaje-riesgo-texto" style={{ textAlign: 'center' }}>
+    Silla_02 y Cojín_sofá_02 presentan condiciones de temperatura y humedad inadecuadas — 35°C · 40%
+  </p>
+  <div className="mensaje-riesgo-botones">
+    <button className="boton-mandar-aviso" onClick={() => alert('Aviso enviado al equipo de conservación y registro')}>
+  Mandar aviso
+</button>
+    <button className="boton-exportar-informe" onClick={() => alert('Exportando informe...')}>
+     Exportar informe
+    </button>
+  </div>
+</div>
+            <button className="mensaje-riesgo-cerrar" onClick={() => setMensajeCerrado(true)}>✕</button>
+          </div>
+        </div>
       )}
     </div>
   )

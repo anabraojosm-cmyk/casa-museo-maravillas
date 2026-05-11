@@ -1,25 +1,15 @@
- import { useState } from 'react'
+import { useState } from 'react'
 import piezas from '../../data/piezas.json'
 
 function PanelBuscador({ onPiezaSeleccionada }) {
   const [busqueda, setBusqueda] = useState('')
-  const [piezaSeleccionada, setPiezaSeleccionada] = useState({
-    codigo: '--',
-    nombre: '--',
-    autor: '--',
-    datacion: '--',
-    tipologia: '--',
-    materiales: '--',
-    dimensiones: '--'
-  })
+  const [piezaSeleccionada, setPiezaSeleccionada] = useState(null)
 
   const buscarPieza = () => {
-    console.log('función ejecutada', busqueda)
     const resultado = piezas.find(
       (p) => p.codigo.toLowerCase() === busqueda.toLowerCase().trim()
     )
     if (resultado) {
-      console.log('resultado encontrado', resultado)
       setPiezaSeleccionada(resultado)
       onPiezaSeleccionada(resultado.codigo)
     } else {
@@ -36,33 +26,39 @@ function PanelBuscador({ onPiezaSeleccionada }) {
   return (
     <div className="buscador-contenedor">
 
-      <div className="buscador-izquierda">
-        <input
-          className="buscador-input"
-          type="text"
-          placeholder="Código de la pieza..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-        <button className="boton-buscar" onClick={() => buscarPieza()}>
-          🔍 Buscar
-        </button>
-        <div className="buscador-botones">
-          <button className="boton-rotar">🔄 Rotar</button>
-          <button className="boton-sustituir">🔁 Sustituir</button>
-          <button className="boton-vacio">⬜ Dejar vacío</button>
-        </div>
+      {/* TÍTULO */}
+      <p className="buscador-titulo">Buscador de piezas</p>
+
+      {/* INPUT */}
+      <input
+        className="buscador-input"
+        type="text"
+        placeholder="Código de la pieza..."
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+        onKeyDown={handleKeyDown}
+      />
+      <button className="boton-buscar" onClick={() => buscarPieza()}>
+        Buscar
+      </button>
+
+      {/* BOTONES */}
+      <div className="buscador-botones">
+        <button className="boton-rotar">Rotar</button>
+        <button className="boton-sustituir">Sustituir</button>
+        <button className="boton-vacio">Dejar vacío</button>
       </div>
 
+      {/* VISTA PIEZA */}
       <div className="buscador-centro">
         {piezaSeleccionada ? (
           <p className="nombre-pieza-centro">{piezaSeleccionada.nombre}</p>
         ) : (
-          <p className="placeholder-pieza">[ Foto o modelo 3D de la pieza ]</p>
+          <p className="placeholder-pieza">Modelo 3D de la pieza</p>
         )}
       </div>
 
+      {/* DATOS PIEZA */}
       <div className="buscador-derecha">
         <p><strong>Nombre:</strong> {piezaSeleccionada ? piezaSeleccionada.nombre : '—'}</p>
         <p><strong>Autor:</strong> {piezaSeleccionada ? piezaSeleccionada.autor : '—'}</p>
@@ -70,7 +66,7 @@ function PanelBuscador({ onPiezaSeleccionada }) {
         <p><strong>Tipología:</strong> {piezaSeleccionada ? piezaSeleccionada.tipologia : '—'}</p>
         <p><strong>Materiales:</strong> {piezaSeleccionada ? piezaSeleccionada.materiales : '—'}</p>
         <p><strong>Dimensiones:</strong> {piezaSeleccionada ? piezaSeleccionada.dimensiones : '—'}</p>
-        <button className="boton-exportar">📄 Exportar</button>
+        <button className="boton-exportar">Exportar</button>
       </div>
 
     </div>
