@@ -60,7 +60,6 @@ function calcularColorHumedad(x, z) {
   return color
 }
 
-// Componente que parpadea — tiene que estar DENTRO del Canvas
 function ParpadeoRiesgo({ materialesRiesgo }) {
   useFrame(({ clock }) => {
     const t = (Math.sin(clock.getElapsedTime() * 3) + 1) / 2
@@ -79,13 +78,42 @@ function Sala({ codigoSeleccionado, vistaActiva, materialesRiesgo, sustitucion }
   const mostrarMapa = vistaActiva === 'calor-temperatura' || vistaActiva === 'calor-humedad'
   const mostrarRiesgo = vistaActiva === 'piezas-riesgo'
 
+  // Ocultar cuadro_05 por defecto al cargar
   useEffect(() => {
     scene.traverse((objeto) => {
-      if (objeto.name === 'techo') objeto.visible = false
-      if (sustitucion && objeto.name === sustitucion.original) {
-       objeto.visible = false
+      if (objeto.name === 'cuadro_05') {
+        objeto.visible = false
+      }
+    })
+  }, [scene])
+
+  useEffect(() => {
+    scene.traverse((objeto) => {
+      if (objeto.name === 'techo') {
+        objeto.visible = false
         return
+      }
+
+      // Lógica de sustitución
+      if (sustitucion) {
+        if (objeto.name === sustitucion.original) {
+          objeto.visible = false
+          return
         }
+        if (objeto.name === sustitucion.sustituta) {
+          objeto.visible = true
+        }
+      } else {
+        // Sin sustitución — restaurar visibilidad original
+        if (objeto.name === 'cuadro_05') {
+          objeto.visible = false
+          return
+        }
+        if (objeto.name !== 'techo') {
+          objeto.visible = true
+        }
+      }
+
       if (objeto.isMesh) {
         if (!materialesOriginales.current[objeto.name]) {
           materialesOriginales.current[objeto.name] = objeto.material.clone()
@@ -123,52 +151,51 @@ function Sala({ codigoSeleccionado, vistaActiva, materialesRiesgo, sustitucion }
         }
       }
     })
-  }, [scene, codigoSeleccionado, vistaActiva, mostrarMapa, mostrarRiesgo])
+  }, [scene, codigoSeleccionado, vistaActiva, mostrarMapa, mostrarRiesgo, sustitucion])
 
   useEffect(() => {
-  scene.traverse((objeto) => {
-    if (objeto.isMesh) {
-      objeto.castShadow = true
-      objeto.receiveShadow = true
-    }
-  })
-}, [scene])
-
-return <primitive object={scene} />
-}
-function SalaConSustituta({ sustitucion }) {
-  if (!sustitucion) return null
-
-  const { scene: sceneSustituta } = useGLTF(
-    `/casa-museo-maravillas/models/piezas/${sustitucion.sustituta}.glb`
-  )
-  const { scene: sceneOriginal } = useGLTF('/casa-museo-maravillas/models/sala.glb')
-
-  const posicion = useRef(new THREE.Vector3())
-
-  useEffect(() => {
-    sceneOriginal.traverse((objeto) => {
-      if (objeto.name === sustitucion.original) {
-        objeto.getWorldPosition(posicion.current)
+    scene.traverse((objeto) => {
+      if (objeto.isMesh) {
+        objeto.castShadow = true
+        objeto.receiveShadow = true
       }
     })
-    const box = new THREE.Box3().setFromObject(sceneSustituta)
-    const center = box.getCenter(new THREE.Vector3())
-    sceneSustituta.position.copy(posicion.current).sub(center)
-  }, [sustitucion, sceneSustituta, sceneOriginal])
+  }, [scene])
 
-  return <primitive object={sceneSustituta} />
+  return <primitive object={scene} />
 }
-function Visor3D({ codigoSeleccionado, vistaActiva }) {
+
+function Visor3D({ codigoSeleccionado, vistaActiva, sustitucion }) {
   const [mensajeCerrado, setMensajeCerrado] = useState(false)
   const materialesRiesgo = useRef({})
   const mostrarMapa = vistaActiva === 'calor-temperatura' || vistaActiva === 'calor-humedad'
   const mostrarRiesgo = vistaActiva === 'piezas-riesgo'
+  const controlsRef = useRef()
 
   useEffect(() => {
     setMensajeCerrado(false)
     materialesRiesgo.current = {}
   }, [vistaActiva])
+
+  useEffect(() => {
+    const handleZoomIn = () => {
+      if (controlsRef.current) { controlsRef.current.dollyIn(1.2); controlsRef.current.update() }
+    }
+    const handleZoomOut = () => {
+      if (controlsRef.current) { controlsRef.current.dollyOut(1.2); controlsRef.current.update() }
+    }
+    const handleReset = () => {
+      if (controlsRef.current) controlsRef.current.reset()
+    }
+    document.addEventListener('zoom-in', handleZoomIn)
+    document.addEventListener('zoom-out', handleZoomOut)
+    document.addEventListener('reset-camera', handleReset)
+    return () => {
+      document.removeEventListener('zoom-in', handleZoomIn)
+      document.removeEventListener('zoom-out', handleZoomOut)
+      document.removeEventListener('reset-camera', handleReset)
+    }
+  }, [])
 
   const escalaTemperatura = 'linear-gradient(to bottom, #ff2200, #ffaa00, #44cc44, #44aaff, #2255ff)'
   const escalaHumedad = 'linear-gradient(to bottom, #0022ff, #0088ff, #00aaff, #88cc44, #ffaa00)'
@@ -176,59 +203,28 @@ function Visor3D({ codigoSeleccionado, vistaActiva }) {
   const labelsHumedad = ['70%+', '60%', '50%', '40%', '-40%']
   const escalaGradiente = vistaActiva === 'calor-temperatura' ? escalaTemperatura : escalaHumedad
   const escalaLabels = vistaActiva === 'calor-temperatura' ? labelsTemperatura : labelsHumedad
-const cameraRef = useRef()
-const controlsRef = useRef()
 
-useEffect(() => {
-  const handleZoomIn = () => {
-    if (controlsRef.current) {
-      controlsRef.current.dollyIn(1.2)
-      controlsRef.current.update()
-    }
-  }
-  const handleZoomOut = () => {
-    if (controlsRef.current) {
-      controlsRef.current.dollyOut(1.2)
-      controlsRef.current.update()
-    }
-  }
-  const handleReset = () => {
-    if (controlsRef.current) {
-      controlsRef.current.reset()
-    }
-  }
-
-  document.addEventListener('zoom-in', handleZoomIn)
-  document.addEventListener('zoom-out', handleZoomOut)
-  document.addEventListener('reset-camera', handleReset)
-
-  return () => {
-    document.removeEventListener('zoom-in', handleZoomIn)
-    document.removeEventListener('zoom-out', handleZoomOut)
-    document.removeEventListener('reset-camera', handleReset)
-  }
-}, [])
   return (
     <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
       <Canvas
-  shadows
-  camera={{ position: [0, 5, 10], fov: 60 }}
-  style={{ width: '100%', height: '100%', display: 'block' }}
->
+        shadows
+        camera={{ position: [0, 5, 10], fov: 60 }}
+        style={{ width: '100%', height: '100%', display: 'block' }}
+      >
         <ambientLight intensity={0.3} />
-<directionalLight 
-  position={[10, 10, 5]} 
-  intensity={2} 
-  castShadow
-  shadow-mapSize-width={2048}
-  shadow-mapSize-height={2048}
-  shadow-camera-far={50}
-  shadow-camera-left={-20}
-  shadow-camera-right={20}
-  shadow-camera-top={20}
-  shadow-camera-bottom={-20}
-/>
-<directionalLight position={[-5, 8, -5]} intensity={0.5} />
+        <directionalLight
+          position={[10, 10, 5]}
+          intensity={2}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-far={50}
+          shadow-camera-left={-20}
+          shadow-camera-right={20}
+          shadow-camera-top={20}
+          shadow-camera-bottom={-20}
+        />
+        <directionalLight position={[-5, 8, -5]} intensity={0.5} />
         <Suspense fallback={null}>
           <Sala
             codigoSeleccionado={codigoSeleccionado}
@@ -236,20 +232,17 @@ useEffect(() => {
             materialesRiesgo={materialesRiesgo}
             sustitucion={sustitucion}
           />
-<SalaConSustituta sustitucion={sustitucion} />
-
           {mostrarRiesgo && <ParpadeoRiesgo materialesRiesgo={materialesRiesgo} />}
           <Environment preset="apartment" />
         </Suspense>
-        <OrbitControls 
-  ref={controlsRef}
-  enableZoom={true} 
-  enableRotate={true} 
-  enablePan={true} 
-/>
+        <OrbitControls
+          ref={controlsRef}
+          enableZoom={true}
+          enableRotate={true}
+          enablePan={true}
+        />
       </Canvas>
 
-      {/* Escala mapa de calor */}
       {mostrarMapa && (
         <div className="escala-calor">
           <div className="escala-calor-barra" style={{ background: escalaGradiente }} />
@@ -261,25 +254,24 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Mensaje piezas en riesgo */}
       {mostrarRiesgo && !mensajeCerrado && (
         <div className="mensaje-riesgo">
           <div className="mensaje-riesgo-contenido">
             <span className="mensaje-riesgo-icono">⚠️</span>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-  <p className="mensaje-riesgo-titulo">Piezas en riesgo</p>
-  <p className="mensaje-riesgo-texto" style={{ textAlign: 'center' }}>
-    Silla_02 y Cojín_sofá_02 presentan condiciones de temperatura y humedad inadecuadas — 35°C · 40%
-  </p>
-  <div className="mensaje-riesgo-botones">
-    <button className="boton-mandar-aviso" onClick={() => alert('Aviso enviado al equipo de conservación y registro')}>
-  Mandar aviso
-</button>
-    <button className="boton-exportar-informe" onClick={() => alert('Exportando informe...')}>
-     Exportar informe
-    </button>
-  </div>
-</div>
+              <p className="mensaje-riesgo-titulo">Piezas en riesgo</p>
+              <p className="mensaje-riesgo-texto" style={{ textAlign: 'center' }}>
+                Silla_02 y Cojín_sofá_02 presentan condiciones de temperatura y humedad inadecuadas — 35°C · 40%
+              </p>
+              <div className="mensaje-riesgo-botones">
+                <button className="boton-mandar-aviso" onClick={() => alert('Aviso enviado al equipo de conservación y registro')}>
+                  Mandar aviso
+                </button>
+                <button className="boton-exportar-informe" onClick={() => alert('Exportando informe...')}>
+                  Exportar informe
+                </button>
+              </div>
+            </div>
             <button className="mensaje-riesgo-cerrar" onClick={() => setMensajeCerrado(true)}>✕</button>
           </div>
         </div>

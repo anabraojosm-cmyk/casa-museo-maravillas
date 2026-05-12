@@ -142,4 +142,16 @@
     "imagen": "",
     "enRiesgo": false
   }
+  ,
+  {
+    "codigo": "cuadro_05",
+    "nombre": "Alegoría de las estaciones",
+    "autor": "Escuela madrileña",
+    "datacion": "ca. 1780",
+    "tipologia": "Pintura",
+    "materiales": "Óleo sobre lienzo",
+    "dimensiones": "88 x 68 cm",
+    "imagen": "",
+    "enRiesgo": false
+  }
 ]

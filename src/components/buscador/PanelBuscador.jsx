@@ -19,8 +19,10 @@ function ModeloPieza({ codigo }) {
 function VisorPieza({ codigo }) {
   return (
     <Canvas
+      frameloop="demand"
       camera={{ position: [0, 0, 3], fov: 50 }}
       style={{ width: '100%', height: '100%' }}
+      gl={{ antialias: true }}
     >
       <ambientLight intensity={0.6} />
       <directionalLight position={[5, 5, 5]} intensity={1} />
@@ -28,7 +30,7 @@ function VisorPieza({ codigo }) {
         <ModeloPieza codigo={codigo} />
         <Environment preset="apartment" />
       </Suspense>
-      <OrbitControls enableZoom={true} enableRotate={true} enablePan={false} target={[0, 0, 0]} />
+      <OrbitControls enableZoom={true} enableRotate={true} enablePan={false} target={[0, 0, 0]} makeDefault />
     </Canvas>
   )
 }
@@ -46,8 +48,8 @@ function PanelBuscador({ onPiezaSeleccionada, onSustitucion }) {
   const [modalSustituir, setModalSustituir] = useState(false)
   const [busquedaSustituir, setBusquedaSustituir] = useState('')
   const [resultadoSustituir, setResultadoSustituir] = useState(null)
+  const [piezaMostrada, setPiezaMostrada] = useState(null)
 
-  const piezaMostrada = piezaSustituta || piezaSeleccionada
   const tieneModelo = piezaMostrada && piezasConModelo.includes(piezaMostrada.codigo)
 
   const buscarPieza = () => {
@@ -56,10 +58,12 @@ function PanelBuscador({ onPiezaSeleccionada, onSustitucion }) {
     )
     if (resultado) {
       setPiezaSeleccionada(resultado)
+      setPiezaMostrada(resultado)
       setPiezaSustituta(null)
       onPiezaSeleccionada(resultado.codigo)
     } else {
       setPiezaSeleccionada(null)
+      setPiezaMostrada(null)
       onPiezaSeleccionada(null)
       alert('No se ha encontrado ninguna pieza con ese código')
     }
@@ -74,18 +78,19 @@ function PanelBuscador({ onPiezaSeleccionada, onSustitucion }) {
   }
 
   const confirmarSustitucion = () => {
-  if (resultadoSustituir && piezaSeleccionada) {
-    setPiezaSustituta(resultadoSustituir)
-    onPiezaSeleccionada(resultadoSustituir.codigo)
-    onSustitucion({
-      original: piezaSeleccionada.codigo,
-      sustituta: resultadoSustituir.codigo
-    })
-    setModalSustituir(false)
-    setBusquedaSustituir('')
-    setResultadoSustituir(null)
+    if (resultadoSustituir && piezaSeleccionada) {
+      setPiezaSustituta(resultadoSustituir)
+      setPiezaMostrada(resultadoSustituir)
+      onPiezaSeleccionada(resultadoSustituir.codigo)
+      onSustitucion({
+        original: piezaSeleccionada.codigo,
+        sustituta: resultadoSustituir.codigo
+      })
+      setModalSustituir(false)
+      setBusquedaSustituir('')
+      setResultadoSustituir(null)
+    }
   }
-}
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') buscarPieza()
@@ -116,7 +121,6 @@ function PanelBuscador({ onPiezaSeleccionada, onSustitucion }) {
         <button className="boton-vacio">RETIRADA</button>
       </div>
 
-      {/* VISTA PIEZA */}
       <div className="buscador-centro">
         {tieneModelo ? (
           <VisorPieza codigo={piezaMostrada.codigo} />
@@ -127,8 +131,7 @@ function PanelBuscador({ onPiezaSeleccionada, onSustitucion }) {
         )}
       </div>
 
-      {/* DATOS PIEZA */}
-      <div className="buscador-derecha">
+      <div className="buscador-derecha" key={piezaMostrada ? piezaMostrada.codigo : 'vacio'}>
         <p><strong>Nombre:</strong> {piezaMostrada ? piezaMostrada.nombre : '—'}</p>
         <p><strong>Autor:</strong> {piezaMostrada ? piezaMostrada.autor : '—'}</p>
         <p><strong>Datación:</strong> {piezaMostrada ? piezaMostrada.datacion : '—'}</p>
@@ -144,7 +147,6 @@ function PanelBuscador({ onPiezaSeleccionada, onSustitucion }) {
         }}>Exportar</button>
       </div>
 
-      {/* MODAL SUSTITUCIÓN */}
       {modalSustituir && (
         <div className="modal-overlay">
           <div className="modal-contenido">
