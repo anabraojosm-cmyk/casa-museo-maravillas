@@ -115,9 +115,6 @@ function App() {
               <button onClick={() => { setVistaActiva('calor-humedad'); setMenuAbierto(false) }}>
                 Mapa de calor de humedad
               </button>
-              <button onClick={() => { setVistaActiva('graficas'); setMenuAbierto(false) }}>
-                Gráficas
-              </button>
               <button onClick={() => { setVistaActiva('piezas-riesgo'); setMenuAbierto(false) }}>
                 Mapa de piezas en riesgo
               </button>
